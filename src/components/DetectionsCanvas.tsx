@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type Detection } from "../data/analysis";
 import DetectionBox from "./Detection";
 
@@ -31,6 +31,7 @@ function DetectionsCanvas({image_url, detections}: Props) {
     imgRef.current.addEventListener("wheel", wheelHandler);
 
     return () => {
+      if(!imgRef.current) return;
       imgRef.current.removeEventListener("wheel", wheelHandler);
     };
 
