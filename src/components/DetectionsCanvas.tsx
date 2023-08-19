@@ -36,13 +36,7 @@ function DetectionsCanvas({image_url, detections}: Props) {
 
   }, []);
 
-  // calculate the zoomed width
-  const width = useMemo(() => {
-
-    if(!imgRef?.current) return 0;
-
-    return (zoom / 100) * imgRef.current?.naturalWidth;
-  }, [zoom, imgRef]);
+  
 
   
 
@@ -50,7 +44,7 @@ function DetectionsCanvas({image_url, detections}: Props) {
     <div 
       className="bg-zinc-800 rounded-lg border-2 border-zinc-700 overflow-hidden w-[90vw] max-w-[90vw] min-w-[90vw] h-[70vh] max-h-[70vh] min-h-[70vh] grid justify-items-center content-center relative">
       
-      <picture className="relative" style={{width:`${zoom}%`, transform: 'translate(0%,0%)'}}>
+      <picture  className="relative" style={{width:`${zoom}%`, transform: 'translate(0%,0%)'}}>
         <img ref={imgRef} src={image_url} className="w-full min-w-full" />
         {
           detections.map((detection) => (
