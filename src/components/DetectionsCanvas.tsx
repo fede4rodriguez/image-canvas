@@ -6,16 +6,16 @@ interface Props {
   detections: Detection[];
 }
 
-function ImageCanvas({image_url}: Props) {
+function DetectionsCanvas({image_url}: Props) {
 
   console.log(image_url);
 
   return (
-    <>
+    <picture className="relative">
       <img src={image_url} alt="" />
-    </>
+    </picture>
   );
 
 }
 
-export default ImageCanvas;
+export default DetectionsCanvas;
