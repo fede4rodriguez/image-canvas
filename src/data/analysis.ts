@@ -4,12 +4,24 @@ export const ANALYSIS = {
   detections: [
     {
       id: "1",
-      label: "person",
-      bounding_box: {
-        top: 10,
-        left: 10,
-        width: 10,
-        height: 10
+      label: "plant1",
+      person: "@fede4rodriguez",
+      box: {
+        top: '28%',
+        left: '5%',
+        width: '9%',
+        height: '12%'
+      }
+    },
+    {
+      id: "2",
+      label: "plant2",
+      person: "@fede4rodriguez",
+      box: {
+        top: '31%',
+        left: '63%',
+        width: '13%',
+        height: '17%'
       }
     }
   ]
