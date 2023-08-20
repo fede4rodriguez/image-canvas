@@ -10,7 +10,7 @@ interface Props {
 
 function DetectionsCanvas({image_url, detections}: Props) {
 
-  const imgRef = useRef<HTMLImageElement>();
+  const imgRef = useRef<HTMLImageElement|undefined>();
 
   const [zoom, setZoom] = useState(100);
 
