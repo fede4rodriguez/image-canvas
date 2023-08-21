@@ -3,7 +3,7 @@ import { ANALYSIS } from "./data/analysis";
 
 function App() {
 
-  const { image_url, detections } = ANALYSIS;
+  const { image, detections } = ANALYSIS;
 
   return (
     <>
@@ -11,7 +11,7 @@ function App() {
         <h1 className="text-6xl font-bold">Dectections<span className="text-blue-400">Canvas</span></h1>
       </header>
       <main className="w-full grid place-content-center">
-        <DetectionsCanvas image_url= {image_url} detections={detections} />
+        <DetectionsCanvas image= {image} detections={detections} />
       </main>
     </>
   )
