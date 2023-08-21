@@ -21,6 +21,8 @@ function DetectionsCanvas({image, detections}: Props) {
 
     if(!pictureRef.current) return;
 
+    const picture = pictureRef.current;
+
     const wheelHandler = (e: WheelEvent) => {
       e.preventDefault();
       if (e.deltaY < 0) {
@@ -30,11 +32,10 @@ function DetectionsCanvas({image, detections}: Props) {
       }
     };
 
-    pictureRef.current.addEventListener("wheel", wheelHandler);
+    picture.addEventListener("wheel", wheelHandler);
 
     return () => {
-      if(!pictureRef.current) return;
-      pictureRef.current.removeEventListener("wheel", wheelHandler);
+      picture.removeEventListener("wheel", wheelHandler);
     };
 
   }, []);
