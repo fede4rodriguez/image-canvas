@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type Image, type Detection } from "../data/analysis";
 import DetectionBox from "./DetectionBox";
-import { useZoom } from "./hooks/useZoom";
-
 
 interface Props { 
   image: Image;
@@ -18,7 +16,7 @@ function DetectionsCanvas({image, detections}: Props) {
   const [zoom, setZoom] = useState(100);
   const [pan, setPan] = useState({x: 0, y: 0});
 
-  const [isDown, setIsDown] = useState<any>(null);
+  const [isDown, setIsDown] = useState<{startClientX: number, startClientY: number} | null>(null);
 
   const pictureRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
