@@ -80,7 +80,7 @@ function DetectionsCanvas({image, detections}: Props) {
       picture.removeEventListener("wheel", wheelHandler);
     };
 
-  }, [zoom, pan, calculateNewPan]);
+  }, [zoom, pan]);
 
   // recalculate pan when zoom changes
   useEffect(() => {
