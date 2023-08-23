@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type Image, type Detection } from "../data/analysis";
-import DetectionBox from "./DetectionBox";
 
 interface Zoom {
   value: number, 
@@ -28,9 +27,10 @@ interface Panning {
 interface Props { 
   image: Image;
   detections: Detection[];
+  children: React.ReactNode;
 }
 
-function DetectionsCanvas({image, detections}: Props) {
+function DetectionsCanvas({image, children}: Props) {
 
   const aspectRatio = useMemo(() => {
     return image.size.width / image.size.height
@@ -156,7 +156,6 @@ function DetectionsCanvas({image, detections}: Props) {
       FORMULAS:
       
       PUNTO = TAMAÑOcurrent * MOUSEinitial / TAMAÑOinitial
-      MOUSEcurrent = ******************************
       DELTA = PUNTO - MOUSEcurrent
       PAN = PANcurrent + DELTA
 
@@ -280,15 +279,10 @@ function DetectionsCanvas({image, detections}: Props) {
       className="bg-zinc-800 rounded-lg border-2 border-zinc-700 overflow-hidden w-[80vw] max-w-[80vw] min-w-[80vw] grid justify-items-center content-center relative">
       
       <picture ref={pictureRef} className="relative" style={{width: `${zoom.value}%`, transform: `translate(${pan.x}px,${pan.y}px)`}}>
-        <img src={image.url} className="w-full h-full" />
-        {
-          detections.map((detection) => (
-            <DetectionBox key={detection.id} detection={detection}/>
-          ))
-        }
+        {children}
       </picture>
       <div className="absolute bg-gray-700 px-2 py-1 top-2 left-2 rounded-md flex gap-2 flex-row">
-        <span>{`zoom: ${zoom.value}% pan-x: ${pan.x} pan-y: ${pan.y}`}</span>
+        <span>{`zoom: ${zoom.value}%`}</span>
         <button onClick={resetZoom}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
