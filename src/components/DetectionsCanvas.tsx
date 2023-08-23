@@ -2,6 +2,29 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type Image, type Detection } from "../data/analysis";
 import DetectionBox from "./DetectionBox";
 
+interface Zoom {
+  value: number, 
+  info?: {
+    pictureMouseX: number, 
+    pictureMouseY: number, 
+    pictureHeight: number, 
+    pictureWidth: number
+  }
+}
+
+interface Pan {
+  x: number, 
+  y: number
+}
+
+interface Panning {
+  value: boolean,
+  info?: {
+    startClientX: number, 
+    startClientY: number
+  }
+}
+
 interface Props { 
   image: Image;
   detections: Detection[];
@@ -13,22 +36,23 @@ function DetectionsCanvas({image, detections}: Props) {
     return image.size.width / image.size.height
   }, [image]);
 
-  const [zoom, setZoom] = useState(100);
-  const [pan, setPan] = useState({x: 0, y: 0});
-
-  const [isDown, setIsDown] = useState<{startClientX: number, startClientY: number} | null>(null);
+  const [zoom, setZoom] = useState<Zoom>({value: 100});
+  const [pan, setPan] = useState<Pan>({x: 0,y: 0});
+  const [isPanning, setIsPanning] = useState<Panning>({value: false});
+  const mousePositionRef = useRef({x: 0, y: 0});
 
   const pictureRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const resetZoom = () => {
-    setZoom(100);
+    setZoom({value: 100});
+    setPan({x:0,y:0})
   }
 
-  const calculateNewPan = useCallback(({ newX, newY }: { newX: number, newY: number}) => {
+  const calculateOverflowNewPan = useCallback(({ possibleNewX, possibleNewY }: { possibleNewX: number, possibleNewY: number}) => {
 
-    const absX = Math.abs(newX);
-    const absY = Math.abs(newY);
+    const absX = Math.abs(possibleNewX);
+    const absY = Math.abs(possibleNewY);
 
     const { width: pictureWidth, height: pictureHeight } = pictureRef?.current?.getBoundingClientRect() ?? { width: 0, height: 0};
     const { width: containerWidth, height: containerHeight } = containerRef?.current?.getBoundingClientRect() ?? { width: 0, height: 0};
@@ -37,24 +61,24 @@ function DetectionsCanvas({image, detections}: Props) {
     const maxY = (pictureHeight - containerHeight + 2.25) / 2;
 
     if(absX >= maxX) {
-      if(newX < 0) {
-        newX = -maxX;
+      if(possibleNewX < 0) {
+        possibleNewX = -maxX;
       } else {
-        newX = maxX;
+        possibleNewX = maxX;
       }
     }
 
     if(absY > maxY) {
-      if(newY < 0) {
-        newY = -maxY;
+      if(possibleNewY < 0) {
+        possibleNewY = -maxY;
       } else {
-        newY = maxY;
+        possibleNewY = maxY;
       }
     }
 
-    return { newX, newY };
+    return { newX: possibleNewX, newY: possibleNewY };
 
-  }, [pictureRef, containerRef]);
+  }, []);
 
   // event listener for zooming
   useEffect(() => {
@@ -68,9 +92,24 @@ function DetectionsCanvas({image, detections}: Props) {
 
       const zoomFactor = 10;
       const zoomIn = e.deltaY < 0;
-      const newZoom = zoomIn ? zoom + zoomFactor : zoom - zoomFactor;
 
-      setZoom((newZoom > 100) ? newZoom : 100);
+      const { width: pictureWidth, height: pictureHeight, left: pictureLeft, top: pictureTop } = picture.getBoundingClientRect();
+
+      const { clientX: windowMouseX, clientY: windowMouseY } = e;
+
+      const pictureMouseX = windowMouseX - pictureLeft;
+      const pictureMouseY = windowMouseY - pictureTop;
+
+      setZoom((currentZoom) => {
+
+        const { value } = currentZoom;
+
+        let newValue = zoomIn ? value + zoomFactor : value - zoomFactor;
+        newValue = (newValue > 100) ? newValue : 100;
+
+        return { value: newValue, info: { pictureMouseX, pictureMouseY, pictureWidth, pictureHeight } }
+
+      });
 
     }
 
@@ -80,16 +119,89 @@ function DetectionsCanvas({image, detections}: Props) {
       picture.removeEventListener("wheel", wheelHandler);
     };
 
-  }, [zoom, pan]);
+  }, []);
+
+  // save position mouse when zoom changes
+  useEffect(() => {
+
+    if(!pictureRef.current) return;
+  
+    const picture = pictureRef.current;
+      
+    const mouseMoveHandler = (e: MouseEvent) => {
+      e.preventDefault();
+      const {clientX, clientY} = e;     
+      
+      mousePositionRef.current = {x: clientX, y: clientY};
+    };
+
+    picture.addEventListener("mousemove", mouseMoveHandler);
+
+    return () => {
+      picture.removeEventListener("mousemove", mouseMoveHandler);
+    };
+
+  }, []);
 
   // recalculate pan when zoom changes
   useEffect(() => {
-    setPan((prevPan) => {
-      const {newX, newY} = calculateNewPan({newX: prevPan.x, newY: prevPan.y});
 
-      return {x: newX, y: newY};
-    });
-  }, [zoom, calculateNewPan]);
+    const { current: picture } = pictureRef ?? {};
+    const { info: infoInitial } = zoom;
+
+    if(!infoInitial || ! picture ) return;
+
+    /*
+
+      FORMULAS:
+      
+      PUNTO = TAMAÑOcurrent * MOUSEinitial / TAMAÑOinitial
+      MOUSEcurrent = ******************************
+      DELTA = PUNTO - MOUSEcurrent
+      PAN = PANcurrent + DELTA
+
+    */
+
+    const { 
+      width: widthCurrent, 
+      height: heightCurrent,
+      left: pictureLeftOfWindowsCurrent,
+      top: pictureTopOfWindowsCurrent
+    } = picture.getBoundingClientRect();
+
+    const { x: mouseXOfWindows, y: mouseYOfWindows } = mousePositionRef.current;
+
+    const mouseXCurrent = mouseXOfWindows - pictureLeftOfWindowsCurrent;
+    const mouseYCurrent = mouseYOfWindows - pictureTopOfWindowsCurrent;
+    
+    const { 
+      pictureWidth: widthInitial, 
+      pictureHeight: heightInitial, 
+      pictureMouseX: mouseXInitial,
+      pictureMouseY: mouseYInitial
+    } = infoInitial;
+
+
+    // calculate Punto (pixel de la imagen que quiero que quede en el mismo lugar)
+    const puntoX = widthCurrent * mouseXInitial / widthInitial;
+    const puntoY = heightCurrent * mouseYInitial / heightInitial;
+
+
+    // calculate Delta (diferencia entre el punto y el mouse actual)
+    const deltaX = puntoX - mouseXCurrent;
+    const deltaY = puntoY - mouseYCurrent;
+
+    // calculate new pan
+    const possibleNewX = pan.x - deltaX;
+    const possibleNewY = pan.y - deltaY;
+
+    const {newX, newY} = calculateOverflowNewPan({possibleNewX, possibleNewY});
+
+    if(newX === pan.x && newY === pan.y) return;
+    
+    setPan({x: newX, y: newY});
+
+  }, [zoom]);
 
   // event listener for panning active
   useEffect(() => {
@@ -102,15 +214,15 @@ function DetectionsCanvas({image, detections}: Props) {
         const startClientX = e.clientX;
         const startClientY = e.clientY;
         
-        setIsDown({startClientX, startClientY});
+        setIsPanning({value: true, info: { startClientX, startClientY }});
       };
   
       const mouseLeaveHandler = () => {
-        setIsDown(null);
+        setIsPanning({value: false});
       };
   
       const mouseUpHandler = () => {
-        setIsDown(null);
+        setIsPanning({value: false});
       };
 
       picture.addEventListener("mousedown", mouseDownHandler);
@@ -128,16 +240,14 @@ function DetectionsCanvas({image, detections}: Props) {
   // event listener for panning move
   useEffect(() => {
 
-    if(!pictureRef.current) return;
+    const { current: picture } = pictureRef ?? {};
+    const { value: panningValue, info: panningInfo } = isPanning;
 
-    if(!isDown) return;
+    if(!picture || !panningValue || !panningInfo) return;
 
-    const picture = pictureRef.current;
+    const { startClientX, startClientY } = panningInfo;
 
-    const startPanX = pan.x;
-    const startPanY = pan.y;
-    const startClientX = isDown.startClientX;
-    const startClientY = isDown.startClientY;
+    const { x: startPanX, y: startPanY } = pan;
 
     const mouseMoveHandler = (e: MouseEvent) => {
       e.preventDefault();
@@ -146,7 +256,10 @@ function DetectionsCanvas({image, detections}: Props) {
       const walkX = (clientX - startClientX);
       const walkY = (clientY - startClientY);
 
-      const { newX, newY } = calculateNewPan({newX: startPanX + walkX, newY: startPanY + walkY});      
+      const possibleNewX = startPanX + walkX;
+      const possibleNewY = startPanY + walkY;
+
+      const { newX, newY } = calculateOverflowNewPan({possibleNewX, possibleNewY});      
       
       setPan({ x: newX,  y: newY });
 
@@ -158,16 +271,16 @@ function DetectionsCanvas({image, detections}: Props) {
       picture.removeEventListener("mousemove", mouseMoveHandler);
     };
 
-  }, [isDown, zoom, calculateNewPan]);
+  }, [isPanning]);
 
   return (
     <div 
       ref={containerRef}
       style={{aspectRatio}}
-      className="bg-zinc-800 rounded-lg border-2 border-zinc-700 overflow-hidden w-[90vw] max-w-[90vw] min-w-[90vw] grid justify-items-center content-center relative">
+      className="bg-zinc-800 rounded-lg border-2 border-zinc-700 overflow-hidden w-[80vw] max-w-[80vw] min-w-[80vw] grid justify-items-center content-center relative">
       
-      <picture ref={pictureRef} className="relative aspect-auto" style={{width: `${zoom}%`, transform: `translate(${pan.x}px,${pan.y}px)`}}>
-        <img src={image.url} className="w-full h-full max-w-full" />
+      <picture ref={pictureRef} className="relative" style={{width: `${zoom.value}%`, transform: `translate(${pan.x}px,${pan.y}px)`}}>
+        <img src={image.url} className="w-full h-full" />
         {
           detections.map((detection) => (
             <DetectionBox key={detection.id} detection={detection}/>
@@ -175,7 +288,7 @@ function DetectionsCanvas({image, detections}: Props) {
         }
       </picture>
       <div className="absolute bg-gray-700 px-2 py-1 top-2 left-2 rounded-md flex gap-2 flex-row">
-        <span>{`zoom: ${zoom}% pan-x: ${pan.x} pan-y: ${pan.y}`}</span>
+        <span>{`zoom: ${zoom.value}% pan-x: ${pan.x} pan-y: ${pan.y}`}</span>
         <button onClick={resetZoom}>
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
