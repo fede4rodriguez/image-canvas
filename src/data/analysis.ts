@@ -13,10 +13,10 @@ export const ANALYSIS = {
       label: "plant1",
       person: "@fede4rodriguez",
       box: {
-        top: '28%',
-        left: '5%',
-        width: '9%',
-        height: '12%'
+        top: 28,
+        left: 5,
+        width: 9,
+        height: 12
       }
     },
     {
@@ -24,10 +24,10 @@ export const ANALYSIS = {
       label: "plant2",
       person: "@fede4rodriguez",
       box: {
-        top: '31%',
-        left: '63%',
-        width: '13%',
-        height: '17%'
+        top: 31,
+        left: 63,
+        width: 13,
+        height: 17
       }
     }
   ]
