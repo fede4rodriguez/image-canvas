@@ -8,8 +8,8 @@ interface Changing {
     startClientY: number;
     startBoxHeightPx: number;
     startBoxWidthPx: number;
-    startBoxTopPercentage?: number;
-    startBoxLeftPercentage?: number;
+    startBoxTopPercentage: number;
+    startBoxLeftPercentage: number;
     startBoxHeightPercentage: number;
     startBoxWidthPercentage: number;    
   };
@@ -45,7 +45,12 @@ function DetectionBox({ detection }: Props) {
 
       const { clientX: startClientX, clientY: startClientY }= e;
       const { height: startBoxHeightPx, width: startBoxWidthPx } = div.getBoundingClientRect();
-      const { height: startBoxHeightPercentage, width: startBoxWidthPercentage } = box;
+      const { 
+        height: startBoxHeightPercentage, 
+        width: startBoxWidthPercentage,
+        top: startBoxTopPercentage,
+        left: startBoxLeftPercentage
+       } = box;
 
       setIsChangingSize({
         value: true,
@@ -55,12 +60,14 @@ function DetectionBox({ detection }: Props) {
           startBoxHeightPx, 
           startBoxWidthPx, 
           startBoxHeightPercentage, 
-          startBoxWidthPercentage 
+          startBoxWidthPercentage,
+          startBoxTopPercentage,
+          startBoxLeftPercentage 
         }
       });
     };
 
-    const mouseUpHandler = (e: MouseEvent) => {
+    /*const mouseUpHandler = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       setIsChangingSize({ value: false });
@@ -68,15 +75,15 @@ function DetectionBox({ detection }: Props) {
 
     const mouseLeaveHandler = () => {
       setIsChangingSize({value: false});
-    };
+    };*/
 
     button.addEventListener("mousedown", mouseDownHandler);
-    button.addEventListener("mouseup", mouseUpHandler);    
+    //button.addEventListener("mouseup", mouseUpHandler);    
     //button.addEventListener("mouseleave", mouseLeaveHandler);
 
     return () => {
       button.removeEventListener("mousedown", mouseDownHandler);
-      button.removeEventListener("mouseup", mouseUpHandler);
+      //button.removeEventListener("mouseup", mouseUpHandler);
       //button.removeEventListener("mouseleave", mouseLeaveHandler);
     };
   }, [box]);
@@ -93,7 +100,9 @@ function DetectionBox({ detection }: Props) {
       startBoxHeightPx, 
       startBoxWidthPx, 
       startBoxHeightPercentage, 
-      startBoxWidthPercentage 
+      startBoxWidthPercentage,
+      startBoxTopPercentage,
+      startBoxLeftPercentage 
     } = changingInfo;
 
     const mouseMoveHandler = (e: MouseEvent) => {
@@ -106,16 +115,32 @@ function DetectionBox({ detection }: Props) {
       const walkPercentageHeight = walkPxsHeight * startBoxHeightPercentage / startBoxHeightPx;
       const walkPercentageWidth = walkPxsWidth * startBoxWidthPercentage / startBoxWidthPx;
 
-      const newHeight = startBoxHeightPercentage + walkPercentageHeight;
-      const newWidth = startBoxWidthPercentage + walkPercentageWidth;
+      let newHeight = startBoxHeightPercentage + walkPercentageHeight;
+      let newWidth = startBoxWidthPercentage + walkPercentageWidth;      
+
+      const newBottom = newHeight + startBoxTopPercentage;
+      const newRight = newWidth + startBoxLeftPercentage;
+
+      if(newBottom > 100) newHeight = 100 - startBoxTopPercentage;
+      if(newRight > 100) newWidth = 100 - startBoxLeftPercentage;
+      if(newHeight < 1) newHeight = 1;
+      if(newWidth < 1) newWidth = 1;
 
       setBox((prev) => ({ ...prev, height: newHeight, width: newWidth }));
     };
 
+    const mouseUpHandler = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsChangingSize({ value: false });
+    };
+
     window.addEventListener("mousemove", mouseMoveHandler);
+    window.addEventListener("mouseup", mouseUpHandler); 
 
     return () => {
       window.removeEventListener("mousemove", mouseMoveHandler);
+      window.removeEventListener("mouseup", mouseUpHandler);
     };
   }, [isChangingSize]);
 
@@ -154,7 +179,7 @@ function DetectionBox({ detection }: Props) {
       });
     };
 
-    const mouseUpHandler = (e: MouseEvent) => {
+    /*const mouseUpHandler = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       setIsChangingPosition({ value: false });
@@ -162,15 +187,15 @@ function DetectionBox({ detection }: Props) {
 
     const mouseLeaveHandler = () => {
       setIsChangingPosition({value: false});
-    };
+    };*/
 
     button.addEventListener("mousedown", mouseDownHandler);
-    button.addEventListener("mouseup", mouseUpHandler);    
+    //button.addEventListener("mouseup", mouseUpHandler);    
     //button.addEventListener("mouseleave", mouseLeaveHandler);
 
     return () => {
       button.removeEventListener("mousedown", mouseDownHandler);
-      button.removeEventListener("mouseup", mouseUpHandler);
+      //button.removeEventListener("mouseup", mouseUpHandler);
       //button.removeEventListener("mouseleave", mouseLeaveHandler);
     };
   }, [box]);
@@ -206,19 +231,34 @@ function DetectionBox({ detection }: Props) {
       const walkPercentageWidth = walkPxsX * startBoxWidthPercentage / startBoxWidthPx;
       const walkPercentageHeight = walkPxsY * startBoxHeightPercentage / startBoxHeightPx;
 
+      // TODO: validar y recalcular las medidas
+      /*if(newWidth < 1) return;
+      if(newHeight < 1) return;
+      if(newLeft < 1) return;
+      if(newTop < 1) return;*/
+
       const newTop = startBoxTopPercentage + walkPercentageTop;
       const newLeft = startBoxLeftPercentage + walkPercentageLeft;
       const newWidth = startBoxWidthPercentage - walkPercentageWidth;
       const newHeight = startBoxHeightPercentage - walkPercentageHeight;
 
+      
 
       setBox({ top: newTop, left: newLeft, width: newWidth, height: newHeight });
     };
 
+    const mouseUpHandler = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsChangingPosition({ value: false });
+    };
+
     window.addEventListener("mousemove", mouseMoveHandler);
+    window.addEventListener("mouseup", mouseUpHandler)
 
     return () => {
       window.removeEventListener("mousemove", mouseMoveHandler);
+      window.removeEventListener("mouseup", mouseUpHandler);
     };
   }, [isChangingPosition]);
 

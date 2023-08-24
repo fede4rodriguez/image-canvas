@@ -278,7 +278,7 @@ function DetectionsCanvas({image, children}: Props) {
       style={{aspectRatio}}
       className="bg-zinc-800 rounded-lg border-2 border-zinc-700 overflow-hidden w-[80vw] max-w-[80vw] min-w-[80vw] grid justify-items-center content-center relative">
       
-      <picture ref={pictureRef} className="relative" style={{width: `${zoom.value}%`, transform: `translate(${pan.x}px,${pan.y}px)`}}>
+      <picture ref={pictureRef} className="relative cursor-pointer" style={{width: `${zoom.value}%`, transform: `translate(${pan.x}px,${pan.y}px)`}}>
         {children}
       </picture>
       <div className="absolute bg-gray-700 px-2 py-1 top-2 left-2 rounded-md flex gap-2 flex-row">
