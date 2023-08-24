@@ -232,7 +232,7 @@ function DetectionBox({ detection }: Props) {
         left: `${box.left}%`,
       }} 
       className="absolute border-2 border-green-600">
-      <span className="bg-green-600 absolute top-[-25px] left-[-2px]">
+      <span className="bg-green-600 absolute top-[-25px] right-[-2px]">
         {label}
       </span>
       <span className="bg-green-600 absolute bottom-[-25px] left-[-2px]">
@@ -240,11 +240,11 @@ function DetectionBox({ detection }: Props) {
       </span>
       <button
         ref={buttonPositionRef}
-        className="absolute top-[-10px] left-[-10px] h-[20px] w-[20px] cursor-nwse-resize"
+        className="bg-green-600/50 absolute top-[-10px] left-[-10px] h-[20px] w-[20px] cursor-nwse-resize"
       ></button>
       <button
         ref={buttonSizeRef}
-        className="absolute bottom-[-10px] right-[-10px] h-[20px] w-[20px] cursor-nwse-resize"
+        className="bg-green-600/50 absolute bottom-[-10px] right-[-10px] h-[20px] w-[20px] cursor-nwse-resize"
       ></button>      
     </div>
   );
