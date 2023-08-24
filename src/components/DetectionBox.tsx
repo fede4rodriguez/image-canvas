@@ -72,12 +72,12 @@ function DetectionBox({ detection }: Props) {
 
     button.addEventListener("mousedown", mouseDownHandler);
     button.addEventListener("mouseup", mouseUpHandler);    
-    button.addEventListener("mouseleave", mouseLeaveHandler);
+    //button.addEventListener("mouseleave", mouseLeaveHandler);
 
     return () => {
       button.removeEventListener("mousedown", mouseDownHandler);
       button.removeEventListener("mouseup", mouseUpHandler);
-      button.removeEventListener("mouseup", mouseUpHandler);
+      //button.removeEventListener("mouseleave", mouseLeaveHandler);
     };
   }, [box]);
 
@@ -112,10 +112,10 @@ function DetectionBox({ detection }: Props) {
       setBox((prev) => ({ ...prev, height: newHeight, width: newWidth }));
     };
 
-    button.addEventListener("mousemove", mouseMoveHandler);
+    window.addEventListener("mousemove", mouseMoveHandler);
 
     return () => {
-      button.removeEventListener("mousemove", mouseMoveHandler);
+      window.removeEventListener("mousemove", mouseMoveHandler);
     };
   }, [isChangingSize]);
 
@@ -166,12 +166,12 @@ function DetectionBox({ detection }: Props) {
 
     button.addEventListener("mousedown", mouseDownHandler);
     button.addEventListener("mouseup", mouseUpHandler);    
-    button.addEventListener("mouseleave", mouseLeaveHandler);
+    //button.addEventListener("mouseleave", mouseLeaveHandler);
 
     return () => {
       button.removeEventListener("mousedown", mouseDownHandler);
       button.removeEventListener("mouseup", mouseUpHandler);
-      button.removeEventListener("mouseup", mouseUpHandler);
+      //button.removeEventListener("mouseleave", mouseLeaveHandler);
     };
   }, [box]);
 
@@ -215,10 +215,10 @@ function DetectionBox({ detection }: Props) {
       setBox({ top: newTop, left: newLeft, width: newWidth, height: newHeight });
     };
 
-    button.addEventListener("mousemove", mouseMoveHandler);
+    window.addEventListener("mousemove", mouseMoveHandler);
 
     return () => {
-      button.removeEventListener("mousemove", mouseMoveHandler);
+      window.removeEventListener("mousemove", mouseMoveHandler);
     };
   }, [isChangingPosition]);
 
