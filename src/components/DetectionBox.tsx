@@ -257,7 +257,7 @@ function DetectionBox({ detection }: Props) {
       }} 
       className="absolute border-2 border-green-600">
       <span className="bg-green-600 absolute top-[-25px] right-[-2px]">
-        {label} {box.top.toFixed(2)} {box.left.toFixed(2)} {box.width.toFixed(2)} {box.height.toFixed(2)}
+        {label}
       </span>
       <span className="bg-green-600 absolute bottom-[-25px] left-[-2px]">
         {person}
