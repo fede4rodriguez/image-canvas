@@ -179,24 +179,10 @@ function DetectionBox({ detection }: Props) {
       });
     };
 
-    /*const mouseUpHandler = (e: MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsChangingPosition({ value: false });
-    };
-
-    const mouseLeaveHandler = () => {
-      setIsChangingPosition({value: false});
-    };*/
-
     button.addEventListener("mousedown", mouseDownHandler);
-    //button.addEventListener("mouseup", mouseUpHandler);    
-    //button.addEventListener("mouseleave", mouseLeaveHandler);
 
     return () => {
       button.removeEventListener("mousedown", mouseDownHandler);
-      //button.removeEventListener("mouseup", mouseUpHandler);
-      //button.removeEventListener("mouseleave", mouseLeaveHandler);
     };
   }, [box]);
 
@@ -229,22 +215,20 @@ function DetectionBox({ detection }: Props) {
       const walkPercentageLeft = walkPxsX * startBoxWidthPercentage / startBoxWidthPx;
       const walkPercentageTop = walkPxsY * startBoxHeightPercentage / startBoxHeightPx;
       const walkPercentageWidth = walkPxsX * startBoxWidthPercentage / startBoxWidthPx;
-      const walkPercentageHeight = walkPxsY * startBoxHeightPercentage / startBoxHeightPx;
+      const walkPercentageHeight = walkPxsY * startBoxHeightPercentage / startBoxHeightPx;      
 
-      // TODO: validar y recalcular las medidas
-      /*if(newWidth < 1) return;
-      if(newHeight < 1) return;
-      if(newLeft < 1) return;
-      if(newTop < 1) return;*/
+      setBox((prev) => {
+        let newTop = startBoxTopPercentage + walkPercentageTop;
+        let newLeft = startBoxLeftPercentage + walkPercentageLeft;
+        let newWidth = startBoxWidthPercentage - walkPercentageWidth;
+        let newHeight = startBoxHeightPercentage - walkPercentageHeight;
 
-      const newTop = startBoxTopPercentage + walkPercentageTop;
-      const newLeft = startBoxLeftPercentage + walkPercentageLeft;
-      const newWidth = startBoxWidthPercentage - walkPercentageWidth;
-      const newHeight = startBoxHeightPercentage - walkPercentageHeight;
+        if(newTop < 0 || newHeight < 1) { newTop = prev.top; newHeight = prev.height; }
+        if(newLeft < 0 || newWidth < 1) { newLeft = prev.left; newWidth = prev.width; }
 
-      
+        return { top: newTop, left: newLeft, width: newWidth, height: newHeight }
+      });
 
-      setBox({ top: newTop, left: newLeft, width: newWidth, height: newHeight });
     };
 
     const mouseUpHandler = (e: MouseEvent) => {
@@ -273,7 +257,7 @@ function DetectionBox({ detection }: Props) {
       }} 
       className="absolute border-2 border-green-600">
       <span className="bg-green-600 absolute top-[-25px] right-[-2px]">
-        {label}
+        {label} {box.top.toFixed(2)} {box.left.toFixed(2)} {box.width.toFixed(2)} {box.height.toFixed(2)}
       </span>
       <span className="bg-green-600 absolute bottom-[-25px] left-[-2px]">
         {person}
