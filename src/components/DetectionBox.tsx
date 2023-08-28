@@ -17,17 +17,18 @@ interface Changing {
 
 interface Props {
   detection: Detection;
+  updateBox: (box: any) => void;
 }
 
-function DetectionBox({ detection }: Props) {
+function DetectionBox({ detection, updateBox }: Props) {
   
-  const { label, person } = detection;
+  const { label, person, box } = detection;
 
   const buttonSizeRef = useRef<HTMLButtonElement>(null);
   const buttonPositionRef = useRef<HTMLButtonElement>(null);
   const divRef = useRef<HTMLDivElement>(null);
 
-  const [box, setBox] = useState(detection.box);  
+  //const [box, setBox] = useState(detection.box);  
 
   const [isChangingSize , setIsChangingSize] = useState<Changing>({ value: false });
   const [isChangingPosition , setIsChangingPosition] = useState<Changing>({ value: false });
@@ -126,7 +127,8 @@ function DetectionBox({ detection }: Props) {
       if(newHeight < 1) newHeight = 1;
       if(newWidth < 1) newWidth = 1;
 
-      setBox((prev) => ({ ...prev, height: newHeight, width: newWidth }));
+      //setBox((prev) => ({ ...prev, height: newHeight, width: newWidth }));
+      updateBox({ top: startBoxTopPercentage, left: startBoxLeftPercentage, height: newHeight, width: newWidth });
     };
 
     const mouseUpHandler = (e: MouseEvent) => {
@@ -217,7 +219,9 @@ function DetectionBox({ detection }: Props) {
       const walkPercentageWidth = walkPxsX * startBoxWidthPercentage / startBoxWidthPx;
       const walkPercentageHeight = walkPxsY * startBoxHeightPercentage / startBoxHeightPx;      
 
-      setBox((prev) => {
+
+      
+      /*setBox((prev) => {
         let newTop = startBoxTopPercentage + walkPercentageTop;
         let newLeft = startBoxLeftPercentage + walkPercentageLeft;
         let newWidth = startBoxWidthPercentage - walkPercentageWidth;
@@ -227,7 +231,17 @@ function DetectionBox({ detection }: Props) {
         if(newLeft < 0 || newWidth < 1) { newLeft = prev.left; newWidth = prev.width; }
 
         return { top: newTop, left: newLeft, width: newWidth, height: newHeight }
-      });
+      });*/
+
+      let newTop = startBoxTopPercentage + walkPercentageTop;
+      let newLeft = startBoxLeftPercentage + walkPercentageLeft;
+      let newWidth = startBoxWidthPercentage - walkPercentageWidth;
+      let newHeight = startBoxHeightPercentage - walkPercentageHeight;
+
+      if(newTop < 0 || newHeight < 1) { newTop = startBoxTopPercentage; newHeight = startBoxHeightPercentage; }
+      if(newLeft < 0 || newWidth < 1) { newLeft = startBoxLeftPercentage; newWidth = startBoxWidthPercentage; }
+
+      updateBox({top: newTop, left: newLeft, width: newWidth, height: newHeight})
 
     };
 
